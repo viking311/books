@@ -6,27 +6,19 @@ import (
 	middlewareLogger "github.com/chi-middleware/logrus-logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/viking311/books/internal/config"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
 	"github.com/viking311/books/internal/transport/rest"
 	"github.com/viking311/books/pkg/database"
 )
 
-var dbConf database.PostgresConfig = database.PostgresConfig{
-	Host:     "localhost",
-	Port:     5432,
-	SSLMode:  "disable",
-	DBName:   "yandex",
-	Username: "postgres",
-	Password: "123456",
-}
-
 func Run() {
 	logger.Info("server start")
 
 	defer logger.Info("server stop")
 
-	db, err := database.NewPostgresConnection(dbConf)
+	db, err := database.NewPostgresConnection(config.Cfg.Database)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -58,6 +50,6 @@ func Run() {
 	r.Post("/book/{id}", updateBookHandler.ServeHTTP)
 	r.Put("/book/{id}", updateBookHandler.ServeHTTP)
 
-	logger.Fatal(http.ListenAndServe(":8080", r))
+	logger.Fatal(http.ListenAndServe(config.Cfg.Server.GetAddr(), r))
 
 }
