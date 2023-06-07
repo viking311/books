@@ -1,11 +1,7 @@
 package server
 
 import (
-	"net/http"
-
-	middlewareLogger "github.com/chi-middleware/logrus-logger"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/gin-gonic/gin"
 	"github.com/viking311/books/internal/config"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
@@ -29,27 +25,22 @@ func Run() {
 		logger.Fatal(err)
 	}
 
-	r := chi.NewRouter()
-
-	r.Use(middleware.RealIP)
-	r.Use(middlewareLogger.Logger("router", logger.Logger))
-	r.Use(middleware.Recoverer)
+	router := gin.Default()
 
 	listHandler := rest.NewGetAllBooksHandler(storage)
-	r.Get("/books", listHandler.ServeHTTP)
+	router.GET("books", listHandler.Handle)
 
 	getBookHandler := rest.NewGetByIdHandler(storage)
-	r.Get("/book/{id}", getBookHandler.ServeHTTP)
+	router.GET("book/:id", getBookHandler.Handle)
 
 	deleteBookHandler := rest.NewDeleteByIdHandler(storage)
-	r.Delete("/book/{id}", deleteBookHandler.ServeHTTP)
+	router.DELETE("book/:id", deleteBookHandler.HAndle)
 
 	updateBookHandler := rest.NewUpdateBookHandler(storage)
-	r.Post("/book", updateBookHandler.ServeHTTP)
-	r.Put("/book", updateBookHandler.ServeHTTP)
-	r.Post("/book/{id}", updateBookHandler.ServeHTTP)
-	r.Put("/book/{id}", updateBookHandler.ServeHTTP)
+	router.POST("book", updateBookHandler.Handle)
+	router.PUT("book", updateBookHandler.Handle)
+	router.POST("book/:id", updateBookHandler.Handle)
+	router.PUT("book/:id", updateBookHandler.Handle)
 
-	logger.Fatal(http.ListenAndServe(config.Cfg.Server.GetAddr(), r))
-
+	router.Run(config.Cfg.Server.GetAddr())
 }

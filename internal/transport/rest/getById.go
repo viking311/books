@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
 )
@@ -14,36 +14,37 @@ type GetByIdHandler struct {
 	Server
 }
 
-func (gbi *GetByIdHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	bookIdStr := chi.URLParam(r, "id")
+func (gbi *GetByIdHandler) Handle(c *gin.Context) {
+	bookIdStr := c.Param("id")
 	bookId, err := strconv.ParseInt(bookIdStr, 10, 64)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
+		c.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	book, err := gbi.storage.GetByID(bookId)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusNotFound)
+		c.Writer.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	body, err := json.Marshal(book)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	_, err = w.Write(body)
+	c.Writer.Header().Add("Content-Type", "application/json")
+	_, err = c.Writer.Write(body)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 }
 
 func NewGetByIdHandler(rep repository.Repository) *GetByIdHandler {

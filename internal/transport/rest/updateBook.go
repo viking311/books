@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gin-gonic/gin"
 	"github.com/viking311/books/internal/domain"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
@@ -16,39 +16,39 @@ type UpdateBookHandler struct {
 	Server
 }
 
-func (ubh *UpdateBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	contentType := r.Header.Get("Content-Type")
+func (ubh *UpdateBookHandler) Handle(c *gin.Context) {
+	contentType := c.Request.Header.Get("Content-Type")
 
 	if contentType != "application/json" {
 		logger.Error("incorrect content type")
-		w.WriteHeader(http.StatusBadRequest)
+		c.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	bookIdStr := chi.URLParam(r, "id")
+	bookIdStr := c.Param("id")
 	var bookID int64
 	if len(bookIdStr) > 0 {
 		bookId, err := strconv.ParseInt(bookIdStr, 10, 64)
 		bookID = bookId
 		if err != nil {
 			logger.Error(err)
-			w.WriteHeader(http.StatusBadRequest)
+			c.Writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
-	body, err := io.ReadAll(r.Body)
+	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
+		c.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
+	defer c.Request.Body.Close()
 
 	var book domain.Book
 	err = json.Unmarshal(body, &book)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
+		c.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -57,13 +57,13 @@ func (ubh *UpdateBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	bookID, err = ubh.storage.Update(book)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	newBook, err := ubh.storage.GetByID(bookID)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -71,17 +71,18 @@ func (ubh *UpdateBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	_, err = w.Write(respBody)
+	c.Writer.Header().Add("Content-Type", "application/json")
+	_, err = c.Writer.Write(respBody)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 }
 
 func NewUpdateBookHandler(resp repository.Repository) *UpdateBookHandler {

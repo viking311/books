@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
 )
@@ -12,25 +13,25 @@ type GetAllBooksHandler struct {
 	Server
 }
 
-func (gab *GetAllBooksHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (gab *GetAllBooksHandler) Handle(c *gin.Context) {
 	list, err := gab.storage.GetAll()
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	body, err := json.Marshal(list)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	_, err = w.Write(body)
+	c.Writer.Header().Add("Content-Type", "application/json")
+	_, err = c.Writer.Write(body)
 	if err != nil {
 		logger.Error(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
