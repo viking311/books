@@ -12,6 +12,14 @@ import (
 	"github.com/viking311/books/internal/repository"
 )
 
+// @Summary      Update/create book
+// @Description  Update/create book
+// @Param        id   path      int  false  "Book ID"
+// @Success      200 {object} domain.Book
+// @Failure      400
+// @Failure      500
+// @Router       /book/{id} [post,put]
+
 type UpdateBookHandler struct {
 	Server
 }

@@ -13,6 +13,13 @@ type GetAllBooksHandler struct {
 	Server
 }
 
+// @Summary      Get all books
+// @Description  get all books
+// @Success      200 {array} domain.Book
+// @Failure      400
+// @Failure      500
+// @Router       /books [get]
+
 func (gab *GetAllBooksHandler) Handle(c *gin.Context) {
 	list, err := gab.storage.GetAll()
 	if err != nil {

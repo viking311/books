@@ -13,6 +13,13 @@ type DeleteByIdHandler struct {
 	Server
 }
 
+// @Summary      Delete book
+// @Description  delete book by ID
+// @Param        id   path      int  true  "Book ID"
+// @Success      200
+// @Failure      400
+// @Failure      500
+// @Router       /book/{id} [delete]
 func (dih *DeleteByIdHandler) HAndle(c *gin.Context) {
 	bookIdStr := c.Param("id")
 	bookId, err := strconv.ParseInt(bookIdStr, 10, 64)

@@ -14,6 +14,13 @@ type GetByIdHandler struct {
 	Server
 }
 
+// @Summary      Get book
+// @Description  get book by ID
+// @Param        id   path      int  true  "Book ID"
+// @Success      200 {object} domain.Book
+// @Failure      400
+// @Failure      500
+// @Router       /book/{id} [get]
 func (gbi *GetByIdHandler) Handle(c *gin.Context) {
 	bookIdStr := c.Param("id")
 	bookId, err := strconv.ParseInt(bookIdStr, 10, 64)
