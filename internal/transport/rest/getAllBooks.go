@@ -1,11 +1,11 @@
-package handlers
+package rest
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"github.com/viking311/books/internal/logger"
-	"github.com/viking311/books/internal/storage"
+	"github.com/viking311/books/internal/repository"
 )
 
 type GetAllBooksHandler struct {
@@ -35,7 +35,7 @@ func (gab *GetAllBooksHandler) ServeHTTP(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func NewGetAllBooksHandler(rep storage.Repository) *GetAllBooksHandler {
+func NewGetAllBooksHandler(rep repository.Repository) *GetAllBooksHandler {
 	return &GetAllBooksHandler{
 		Server: Server{
 			storage: rep,

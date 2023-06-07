@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/viking311/books/internal/logger"
-	"github.com/viking311/books/internal/storage"
+	"github.com/viking311/books/internal/repository"
 )
 
 type DeleteByIdHandler struct {
@@ -30,7 +30,7 @@ func (dih *DeleteByIdHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func NewDeleteByIdHandler(resp storage.Repository) *DeleteByIdHandler {
+func NewDeleteByIdHandler(resp repository.Repository) *DeleteByIdHandler {
 	return &DeleteByIdHandler{
 		Server: Server{
 			storage: resp,

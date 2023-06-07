@@ -1,4 +1,4 @@
-package storage
+package domain
 
 type Book struct {
 	Title  string `json:"title"`

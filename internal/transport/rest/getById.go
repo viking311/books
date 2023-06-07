@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/viking311/books/internal/logger"
-	"github.com/viking311/books/internal/storage"
+	"github.com/viking311/books/internal/repository"
 )
 
 type GetByIdHandler struct {
@@ -46,7 +46,7 @@ func (gbi *GetByIdHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewGetByIdHandler(rep storage.Repository) *GetByIdHandler {
+func NewGetByIdHandler(rep repository.Repository) *GetByIdHandler {
 	return &GetByIdHandler{
 		Server: Server{
 			storage: rep,

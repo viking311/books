@@ -1,4 +1,4 @@
-package handlers
+package rest
 
 import (
 	"encoding/json"
@@ -7,8 +7,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/viking311/books/internal/domain"
 	"github.com/viking311/books/internal/logger"
-	"github.com/viking311/books/internal/storage"
+	"github.com/viking311/books/internal/repository"
 )
 
 type UpdateBookHandler struct {
@@ -43,7 +44,7 @@ func (ubh *UpdateBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 	defer r.Body.Close()
 
-	var book storage.Book
+	var book domain.Book
 	err = json.Unmarshal(body, &book)
 	if err != nil {
 		logger.Error(err)
@@ -83,7 +84,7 @@ func (ubh *UpdateBookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func NewUpdateBookHandler(resp storage.Repository) *UpdateBookHandler {
+func NewUpdateBookHandler(resp repository.Repository) *UpdateBookHandler {
 	return &UpdateBookHandler{
 		Server: Server{
 			storage: resp,
