@@ -1,15 +1,17 @@
-package storage
+package repository
 
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/viking311/books/internal/domain"
 )
 
-type DBRepository struct {
+type PostgresRepository struct {
 	db *sql.DB
 }
 
-func (dbr *DBRepository) Delete(id int64) error {
+func (dbr *PostgresRepository) Delete(id int64) error {
 	_, err := dbr.db.Exec("DELETE FROM books WHERE id=$1", id)
 	if err != nil {
 		return err
@@ -18,7 +20,7 @@ func (dbr *DBRepository) Delete(id int64) error {
 	return nil
 }
 
-func (dbr *DBRepository) Update(value Book) (int64, error) {
+func (dbr *PostgresRepository) Update(value domain.Book) (int64, error) {
 	if value.Id == 0 {
 		var lastinsertedId int64
 		err := dbr.db.QueryRow("INSERT INTO books(title, author, publish_year) VALUES($1,$2,$3) RETURNING id", value.Title, value.Author, value.Year).Scan(&lastinsertedId)
@@ -35,8 +37,8 @@ func (dbr *DBRepository) Update(value Book) (int64, error) {
 	}
 }
 
-func (dbr *DBRepository) GetByID(id int64) (Book, error) {
-	var book Book
+func (dbr *PostgresRepository) GetByID(id int64) (domain.Book, error) {
+	var book domain.Book
 	err := dbr.db.QueryRow("SELECT id, title, author, publish_year FROM books WHERE id=$1", id).Scan(&book.Id, &book.Title, &book.Author, &book.Year)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -48,31 +50,31 @@ func (dbr *DBRepository) GetByID(id int64) (Book, error) {
 	return book, nil
 }
 
-func (dbr *DBRepository) GetAll() ([]Book, error) {
+func (dbr *PostgresRepository) GetAll() ([]domain.Book, error) {
 	rows, err := dbr.db.Query("SELECT id, title, author, publish_year FROM books")
 	if err != nil {
-		return []Book{}, err
+		return []domain.Book{}, err
 	}
 	defer rows.Close()
 
-	var slice []Book = []Book{}
+	var slice []domain.Book = []domain.Book{}
 	for rows.Next() {
-		var book Book
+		var book domain.Book
 		err = rows.Scan(&book.Id, &book.Title, &book.Author, &book.Year)
 		if err != nil {
-			return []Book{}, err
+			return []domain.Book{}, err
 		}
 		slice = append(slice, book)
 	}
 	err = rows.Err()
 	if err != nil {
-		return []Book{}, err
+		return []domain.Book{}, err
 	}
 
 	return slice, nil
 }
 
-func NewDBRepository(db *sql.DB) (*DBRepository, error) {
+func NewPostgresRepository(db *sql.DB) (*PostgresRepository, error) {
 
 	if db == nil {
 		return nil, fmt.Errorf("db instance is needed")
@@ -83,7 +85,7 @@ func NewDBRepository(db *sql.DB) (*DBRepository, error) {
 		return nil, err
 	}
 
-	return &DBRepository{
+	return &PostgresRepository{
 		db: db,
 	}, nil
 }

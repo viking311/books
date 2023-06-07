@@ -1,0 +1,10 @@
+database:
+  host: ""
+  port: 5432
+  dbname: ""
+  sslmode: "disable"	
+  username: ""
+  password: ""
+server:
+  host: ""
+  port: 8080
