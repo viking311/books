@@ -3,15 +3,34 @@ This project is a simple book catalogue with the rest API.
 
 For data storing usage postgres DB
 
+## Confugaration
+You have two ways to change the configuration.
+The first one is to set environment variables.
+There are variables available:
+- DB_HOST
+- DB_PORT
+- DB_DBNAME
+- DB_SSLMODE
+- DB_USERNAME
+- DB_PASSWORD
+- SERVER_HOST
+- SERVER_PORT
+- CACHE_TTL
+
+The second one is to create your own config file and run the application with the flag --c="path to config". An example of the config file configs/main.yml.
+In an additional way, you can use environment variables to rewrite some parameters from the config file.
+
+
 ## Running
 To start the server you need to fill the constant databseDSN in file /cmd/server/main.go and run the command
 ~~~~
-go run ./cmd/server/main.go
+go build -o books ./cmd/server/main.go && ./books
 ~~~~
 After it, the server will be ready to handle requests  by port 8080
 
 ## API
 The server provides rest API with the following methods which allow storing in DB information about books (title, author and publish year). 
+After running the application you can see API documentation by URL  http://localhost:8080/swagger/index.html.
 
 Data is sent and received in JSON format
 ~~~~
