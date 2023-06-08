@@ -8,3 +8,5 @@ database:
 server:
   host: ""
   port: 8080
+cache:
+  ttl: "10s"

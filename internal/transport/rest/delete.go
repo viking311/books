@@ -1,12 +1,14 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
+	"github.com/viking311/cache"
 )
 
 type DeleteByIdHandler struct {
@@ -36,12 +38,15 @@ func (dih *DeleteByIdHandler) HAndle(c *gin.Context) {
 		return
 	}
 
+	dih.cache.Delete(fmt.Sprintf(itemCacheKey, bookId))
+	dih.cache.Delete(listCacheKey)
 }
 
-func NewDeleteByIdHandler(resp repository.Repository) *DeleteByIdHandler {
+func NewDeleteByIdHandler(resp repository.Repository, cache *cache.Cache) *DeleteByIdHandler {
 	return &DeleteByIdHandler{
 		Server: Server{
 			storage: resp,
+			cache:   cache,
 		},
 	}
 }

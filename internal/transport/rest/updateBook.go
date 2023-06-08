@@ -2,14 +2,17 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/viking311/books/internal/config"
 	"github.com/viking311/books/internal/domain"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
+	"github.com/viking311/cache"
 )
 
 // @Summary      Update/create book
@@ -74,7 +77,8 @@ func (ubh *UpdateBookHandler) Handle(c *gin.Context) {
 		c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	ubh.cache.Set(fmt.Sprintf(itemCacheKey, bookID), newBook, config.Cfg.Cache.TTL)
+	ubh.cache.Delete(listCacheKey)
 	respBody, err := json.Marshal(newBook)
 
 	if err != nil {
@@ -93,10 +97,11 @@ func (ubh *UpdateBookHandler) Handle(c *gin.Context) {
 
 }
 
-func NewUpdateBookHandler(resp repository.Repository) *UpdateBookHandler {
+func NewUpdateBookHandler(resp repository.Repository, cache *cache.Cache) *UpdateBookHandler {
 	return &UpdateBookHandler{
 		Server: Server{
 			storage: resp,
+			cache:   cache,
 		},
 	}
 }

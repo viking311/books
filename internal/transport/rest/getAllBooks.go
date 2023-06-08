@@ -5,8 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/viking311/books/internal/config"
+	"github.com/viking311/books/internal/domain"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
+	"github.com/viking311/cache"
 )
 
 type GetAllBooksHandler struct {
@@ -21,11 +24,21 @@ type GetAllBooksHandler struct {
 // @Router       /books [get]
 
 func (gab *GetAllBooksHandler) Handle(c *gin.Context) {
-	list, err := gab.storage.GetAll()
-	if err != nil {
-		logger.Error(err)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		return
+	var list *[]domain.Book
+	if t := gab.cache.Get("books"); !(t == nil) {
+		listT := t.([]domain.Book)
+		list = &listT
+		logger.Debug("read from cache")
+	} else {
+		listT, err := gab.storage.GetAll()
+		if err != nil {
+			logger.Error(err)
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		list = &listT
+		gab.cache.Set(listCacheKey, listT, config.Cfg.Cache.TTL)
+		logger.Debug("read from db")
 	}
 
 	body, err := json.Marshal(list)
@@ -43,10 +56,11 @@ func (gab *GetAllBooksHandler) Handle(c *gin.Context) {
 	}
 }
 
-func NewGetAllBooksHandler(rep repository.Repository) *GetAllBooksHandler {
+func NewGetAllBooksHandler(rep repository.Repository, cache *cache.Cache) *GetAllBooksHandler {
 	return &GetAllBooksHandler{
 		Server: Server{
 			storage: rep,
+			cache:   cache,
 		},
 	}
 }

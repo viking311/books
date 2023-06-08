@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/viper"
@@ -20,9 +21,14 @@ func (sc *ServerConf) GetAddr() string {
 	return fmt.Sprintf("%s:%d", sc.Host, sc.Port)
 }
 
+type CacheConfig struct {
+	TTL time.Duration
+}
+
 type Config struct {
 	Database database.PostgresConfig
 	Server   ServerConf
+	Cache    CacheConfig
 }
 
 var Cfg Config
@@ -51,11 +57,17 @@ func init() {
 	Cfg.Server.Host = viper.GetString("server.host")
 	Cfg.Server.Port = viper.GetInt("server.port")
 
+	Cfg.Cache.TTL = viper.GetDuration("cache.ttl")
+
 	if err := envconfig.Process("db", &Cfg.Database); err != nil {
 		panic(err)
 	}
 
 	if err := envconfig.Process("server", &Cfg.Server); err != nil {
+		panic(err)
+	}
+
+	if err := envconfig.Process("cache", &Cfg.Cache); err != nil {
 		panic(err)
 	}
 

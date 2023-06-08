@@ -2,12 +2,16 @@ package rest
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/viking311/books/internal/config"
+	"github.com/viking311/books/internal/domain"
 	"github.com/viking311/books/internal/logger"
 	"github.com/viking311/books/internal/repository"
+	"github.com/viking311/cache"
 )
 
 type GetByIdHandler struct {
@@ -30,13 +34,22 @@ func (gbi *GetByIdHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	book, err := gbi.storage.GetByID(bookId)
-	if err != nil {
-		logger.Error(err)
-		c.Writer.WriteHeader(http.StatusNotFound)
-		return
+	var book *domain.Book
+	if b := gbi.cache.Get(fmt.Sprintf(itemCacheKey, bookId)); !(b == nil) {
+		bookT := b.(domain.Book)
+		book = &bookT
+		logger.Debug("read from cache")
+	} else {
+		bookT, err := gbi.storage.GetByID(bookId)
+		if err != nil {
+			logger.Error(err)
+			c.Writer.WriteHeader(http.StatusNotFound)
+			return
+		}
+		book = &bookT
+		gbi.cache.Set(fmt.Sprintf(itemCacheKey, bookId), bookT, config.Cfg.Cache.TTL)
+		logger.Debug("read from db")
 	}
-
 	body, err := json.Marshal(book)
 	if err != nil {
 		logger.Error(err)
@@ -54,10 +67,11 @@ func (gbi *GetByIdHandler) Handle(c *gin.Context) {
 
 }
 
-func NewGetByIdHandler(rep repository.Repository) *GetByIdHandler {
+func NewGetByIdHandler(rep repository.Repository, cache *cache.Cache) *GetByIdHandler {
 	return &GetByIdHandler{
 		Server: Server{
 			storage: rep,
+			cache:   cache,
 		},
 	}
 }
