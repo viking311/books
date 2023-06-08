@@ -22,7 +22,6 @@ type GetAllBooksHandler struct {
 // @Failure      400
 // @Failure      500
 // @Router       /books [get]
-
 func (gab *GetAllBooksHandler) Handle(c *gin.Context) {
 	var list *[]domain.Book
 	if t := gab.cache.Get("books"); !(t == nil) {

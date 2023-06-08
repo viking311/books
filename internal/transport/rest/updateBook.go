@@ -15,18 +15,18 @@ import (
 	"github.com/viking311/cache"
 )
 
+type UpdateBookHandler struct {
+	Server
+}
+
 // @Summary      Update/create book
 // @Description  Update/create book
 // @Param        id   path      int  false  "Book ID"
 // @Success      200 {object} domain.Book
 // @Failure      400
 // @Failure      500
-// @Router       /book/{id} [post,put]
-
-type UpdateBookHandler struct {
-	Server
-}
-
+// @Router       /book/{id} [post]
+// @Router       /book/{id} [put]
 func (ubh *UpdateBookHandler) Handle(c *gin.Context) {
 	contentType := c.Request.Header.Get("Content-Type")
 

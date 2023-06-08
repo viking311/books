@@ -53,4 +53,53 @@ paths:
         "500":
           description: Internal Server Error
       summary: Get book
+    post:
+      description: Update/create book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Book'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Update/create book
+    put:
+      description: Update/create book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Book'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Update/create book
+  /books:
+    get:
+      description: get all books
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Book'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get all books
 swagger: "2.0"
